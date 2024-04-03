@@ -1,14 +1,15 @@
 import { IncomingProduct, Product } from "../types/Product";
-import { createSqlQuery } from "../utils/createSqlQuery";
+import { createSqlInsertQuery } from "../utils/createSqlInsertQuery";
+import { createSqlQuery, QueryObj } from "../utils/createSqlQuery";
 import { getLastRow } from "../utils/getLastRow";
 import mySql from "./MySql";
 
-const tableName = "`products`";
+const tableName = "products";
 
 export const createProduct = async (product: Product) => {
   const { title, description, price, createdBy } = product;
 
-  const sql = `INSERT INTO ${tableName} ${createSqlQuery({ title, description, price, createdBy })}`;
+  const sql = `INSERT INTO ${tableName} ${createSqlInsertQuery({ title, description, price, createdBy })}`;
   const values = [title, description, price, createdBy];
   try {
     await mySql.connection!.execute(sql, values);
@@ -18,13 +19,15 @@ export const createProduct = async (product: Product) => {
   }
 };
 
-export const getAllProducts = async () => {
-  const [records] = await mySql.connection!.query(`SELECT * FROM ${tableName}`);
+export const getAllProducts = async (query: QueryObj) => {
+  const sql = createSqlQuery(tableName, query);
+  console.log(sql);
+  const [records] = await mySql.connection!.query(sql);
   return records;
 };
 
 export const getProduct = async (id: number) => {
-  const [result] = await mySql.connection!.query(`SELECT * FROM ${tableName} WHERE id = ?`, id);
+  const [result] = await mySql.connection!.query(`SELECT * FROM ${tableName} p WHERE p.id = ?`, id);
   // @ts-ignore
   return result[0];
 };
@@ -34,7 +37,8 @@ export const deleteProduct = async (id: number) => {
   return result;
 };
 export const updateProduct = async (product: Product, id: number) => {
-  const sql = `UPDATE ${tableName} SET ${Object.entries(product).map(([key, value]) => `${key} = ${value}`)} WHERE id = ?`;
+  const sql = `UPDATE ${tableName} SET ${Object.entries(product).map(([key, value]) => `${key} = '${value}' `)} WHERE id = ?`;
+  console.log(sql);
   const [result] = await mySql.connection!.query(sql, id);
   return result;
 };

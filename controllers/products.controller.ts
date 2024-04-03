@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { createProduct, deleteProduct, getAllProducts, getProduct, updateProduct } from "../services/products.service";
 import { IncomingProduct, Product } from "../types/Product";
+import { QueryObj } from "../utils/createSqlQuery";
 
 export const createProductHandler: RequestHandler<{}, {}, Product> = async (req, res) => {
   if (!req.currentUser) {
@@ -15,9 +16,10 @@ export const createProductHandler: RequestHandler<{}, {}, Product> = async (req,
   }
 };
 
-export const getAllProductsHandler: RequestHandler<{}, {}, Product[]> = async (req, res) => {
+export const getAllProductsHandler: RequestHandler<any, any, Product[]> = async (req, res) => {
+  console.log(req.query);
   try {
-    const products = await getAllProducts();
+    const products = await getAllProducts(req.query as QueryObj);
     res.status(200).json({ products });
   } catch (err) {
     console.log(err);

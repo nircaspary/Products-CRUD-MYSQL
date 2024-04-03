@@ -1,16 +1,16 @@
 import jwt from "jsonwebtoken";
 import { Auth, IncomingUser, User } from "../types/User";
-import { createSqlQuery } from "../utils/createSqlQuery";
+import { createSqlInsertQuery } from "../utils/createSqlInsertQuery";
 import mySql from "./MySql";
 import { Password } from "./password";
 
-const dbName = "`users`";
+const dbName = "users";
 
 export const signUp = async (user: User) => {
   const { email, name, password } = user;
   const hashedPassword = await Password.toHash(password);
 
-  const sql = `INSERT INTO ${dbName} ${createSqlQuery({ password, email, name })}`;
+  const sql = `INSERT INTO ${dbName} ${createSqlInsertQuery({ password, email, name })}`;
   const values = [hashedPassword, email, name];
   try {
     await mySql.connection!.execute(sql, values);
